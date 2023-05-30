@@ -1,0 +1,3905 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[    156405,       3897]
+NotebookOptionsPosition[    155044,       3867]
+NotebookOutlinePosition[    155466,       3884]
+CellTagsIndexPosition[    155423,       3881]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+     "The", " ", "Convention", " ", "of", " ", "this", " ", "Notebook", " ", 
+      "is", " ", "that", " ", "for", " ", "a", " ", "state"}], "|", 
+     RowBox[{"000", ">"}]}], ",", " ", 
+    RowBox[{"the", " ", "first", " ", "0", " ", "stands", " ", "for", " ", 
+     RowBox[{"qubit", " ", "'"}], 
+     RowBox[{"2", "'"}]}], ",", " ", 
+    RowBox[{"and", " ", "the", " ", 
+     RowBox[{"last", " ", "'"}], 
+     RowBox[{"0", "'"}], " ", "for", " ", 
+     RowBox[{"qubit", " ", "'"}], 
+     RowBox[{"0", "'"}], " ", 
+     RowBox[{"etc", ".", "  ", "Thus"}], " ", "to", " ", "NOT", " ", "the", 
+     " ", "first", " ", "qubit"}], ",", " ", 
+    RowBox[{
+    "while", " ", "hadamarding", " ", "the", " ", "third", " ", "means", " ", 
+     "you", " ", "tensor", " ", "product", " ", "the", " ", "operators", " ", 
+     "as", " ", 
+     RowBox[{"such", ":", " ", 
+      RowBox[{"H", "\[TensorProduct]", "I", "\[TensorProduct]", "X"}]}]}]}], 
+   " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+    "I", " ", "really", " ", "should", " ", "turn", " ", "this", " ", "into", 
+     " ", "a", " ", "proper", " ", "package"}], ",", " ", 
+    RowBox[{"for", " ", "now"}], ",", " ", 
+    RowBox[{
+    "evaluate", " ", "the", " ", "single", " ", "line", " ", "below"}], ",", 
+    " ", 
+    RowBox[{
+    "and", " ", "head", " ", "to", " ", "the", " ", "bottom", " ", "of", " ", 
+     "the", " ", "notebook", " ", "for", " ", "an", " ", "example", " ", 
+     "quantum", " ", "circuit"}]}], "*)"}]}]], "Text", "Input",
+ CellChangeTimes->{{3.850745805283063*^9, 3.850745903794958*^9}, {
+  3.850745993091442*^9, 3.8507461142352486`*^9}, {3.8507681886648493`*^9, 
+  3.8507682283906837`*^9}, {3.894146483550496*^9, 3.894146484576271*^9}, {
+  3.89439713117284*^9, 3.894397145364148*^9}, {3.894417051005351*^9, 
+  3.894417082870885*^9}},ExpressionUUID->"a93302b8-6326-4e1b-8cb0-\
+e9787e412dc9"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", "Global", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"q", " ", "=", " ", "."}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"Number", " ", "of", " ", "Qubits"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"n", " ", "=", " ", "."}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"Dimension", " ", "of", " ", "statespace"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"all", " ", "=."}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{
+    "used", " ", "to", " ", "simplify", " ", "performing", " ", "operation", 
+     " ", "on", " ", "all", " ", "qubits"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Sieve", "=."}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"bases", "=."}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"state", "=."}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Useful", " ", "definitions"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Tensor", "[", 
+     RowBox[{"a_", ",", "b_"}], "]"}], ":=", 
+    RowBox[{"Return", "[", 
+     RowBox[{"KroneckerProduct", "[", 
+      RowBox[{"a", ",", "b"}], "]"}], "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"px", " ", "=", " ", 
+     RowBox[{"PauliMatrix", "[", "1", "]"}]}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"Pauli", " ", "Matrices"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"py", " ", "=", " ", 
+     RowBox[{"PauliMatrix", "[", "2", "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"pz", " ", "=", " ", 
+     RowBox[{"PauliMatrix", "[", "3", "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ph", "[", "\[Phi]_", "]"}], ":=", 
+    RowBox[{"Return", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", 
+         RowBox[{"Exp", "[", 
+          RowBox[{"I", " ", "\[Phi]"}], "]"}]}], "}"}]}], "}"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"H", " ", "=", " ", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"pz", "+", "px"}], ")"}], "/", 
+      RowBox[{"Sqrt", "[", "2", "]"}]}]}], ";"}], " ", 
+   RowBox[{"(*", "Hadamard", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Id1", " ", "=", 
+     RowBox[{"IdentityMatrix", "[", "1", "]"}]}], ";"}], " ", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Id2", " ", "=", 
+     RowBox[{"IdentityMatrix", "[", "2", "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"zero", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", "1", "}"}], ",", 
+       RowBox[{"{", "0", "}"}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"one", " ", "=", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", "0", "}"}], ",", 
+       RowBox[{"{", "1", "}"}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ZERO", " ", "=", " ", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", "1", "}"}], ",", 
+        RowBox[{"{", "0", "}"}]}], "}"}], ".", 
+      RowBox[{"Transpose", "[", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", "1", "}"}], ",", 
+         RowBox[{"{", "0", "}"}]}], "}"}], "]"}]}]}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"|", 
+     RowBox[{"0", ">", "<", "0"}], "|"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ONE", " ", "=", " ", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", "0", "}"}], ",", 
+        RowBox[{"{", "1", "}"}]}], "}"}], ".", 
+      RowBox[{"Transpose", "[", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", "0", "}"}], ",", 
+         RowBox[{"{", "1", "}"}]}], "}"}], "]"}]}]}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"|", 
+     RowBox[{"1", ">", "<", "1"}], "|"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"AllSatisfy", "[", 
+     RowBox[{"expr_", ",", "cond_"}], "]"}], ":=", 
+    RowBox[{
+     RowBox[{"Length", "@", 
+      RowBox[{"Select", "[", 
+       RowBox[{"expr", ",", "cond"}], "]"}]}], "\[Equal]", 
+     RowBox[{"Length", "@", "expr"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RX", "[", "\[Theta]_", "]"}], ":=", " ", 
+    RowBox[{"Return", "[", 
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "I"}], " ", "px", " ", 
+       RowBox[{"\[Theta]", "/", "2"}]}], "]"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RY", "[", "\[Theta]_", "]"}], " ", ":=", " ", 
+    RowBox[{"Return", "[", 
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "I"}], " ", "py", " ", 
+       RowBox[{"\[Theta]", "/", "2"}]}], "]"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RZ", "[", "\[Theta]_", "]"}], " ", ":=", " ", 
+    RowBox[{"Return", "[", 
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "I"}], " ", "pz", " ", 
+       RowBox[{"\[Theta]", "/", "2"}]}], "]"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Global", " ", "Setter", " ", "Function"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Qubits", "[", "Q_", "]"}], ":=", " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"i", ",", "k"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"q", "=", "Q"}], ";", " ", 
+       RowBox[{"n", "=", 
+        RowBox[{"2", "^", "Q"}]}], ";", " ", 
+       RowBox[{"all", " ", "=", " ", 
+        RowBox[{"Range", "[", "Q", "]"}]}], ";", 
+       RowBox[{"Sieve", "=", 
+        RowBox[{"Transpose", "[", 
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"Mod", "[", 
+            RowBox[{
+             RowBox[{"Floor", "[", 
+              RowBox[{"i", "/", 
+               RowBox[{"2", "^", 
+                RowBox[{"(", 
+                 RowBox[{
+                  RowBox[{"Range", "[", "Q", "]"}], "-", "1"}], ")"}]}]}], 
+              "]"}], ",", "2"}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"i", ",", "0", ",", 
+             RowBox[{
+              RowBox[{"2", "^", "Q"}], "-", "1"}]}], "}"}]}], "]"}], "]"}]}], 
+       ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"bases", "=", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"{", "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"j", ",", "q"}], "}"}]}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"k", "=", "1"}], ",", 
+         RowBox[{"k", "\[LessEqual]", " ", "q"}], ",", 
+         RowBox[{"k", "++"}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"i", " ", "=", " ", "1"}], ";"}], " ", ",", " ", 
+            RowBox[{"i", "\[LessEqual]", 
+             RowBox[{"2", "^", "k"}]}], " ", ",", " ", 
+            RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"AppendTo", "[", 
+             RowBox[{
+              RowBox[{"bases", "[", 
+               RowBox[{"[", "k", "]"}], "]"}], ",", 
+              RowBox[{"StringRiffle", "[", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Reverse", "[", 
+                  RowBox[{"Table", "[", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"Transpose", "[", 
+                    RowBox[{
+                    RowBox[{"Reverse", "[", "Sieve", "]"}], "[", 
+                    RowBox[{"[", 
+                    RowBox[{"i", ";;", "q"}], "]"}], "]"}], "]"}], "[", 
+                    RowBox[{"[", 
+                    RowBox[{"1", ";;", 
+                    RowBox[{"n", "/", 
+                    RowBox[{"2", "^", 
+                    RowBox[{"(", 
+                    RowBox[{"i", "-", "1"}], ")"}]}]}]}], "]"}], "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"i", ",", "1", ",", "q"}], "}"}]}], "]"}], "]"}], 
+                 "[", 
+                 RowBox[{"[", 
+                  RowBox[{"k", ",", "i"}], "]"}], "]"}], ",", "\"\<\>\""}], 
+               "]"}]}], "]"}]}], "\[IndentingNewLine]", "]"}], ";"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"ToExpression", "[", 
+          RowBox[{"\"\<q\>\"", "<>", 
+           RowBox[{"ToString", "[", "i", "]"}], " ", "<>", "\"\<=\>\"", "<>", 
+           RowBox[{"ToString", "[", 
+            RowBox[{"i", "+", "1"}], "]"}]}], "]"}], " ", ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "0", ",", 
+           RowBox[{"Q", "-", "1"}]}], "}"}]}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"state", " ", "=", " ", "zero"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"PTL0", "=", " ", 
+        RowBox[{"Transpose", "[", "zero", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"PTR0", "=", " ", "zero"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"PTL1", "=", " ", 
+        RowBox[{"Transpose", "[", "one", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"PTR1", "=", " ", "one"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", "=", "2"}], ",", " ", 
+         RowBox[{"i", "\[LessEqual]", " ", "Q"}], ",", " ", 
+         RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"state", " ", "=", " ", 
+           RowBox[{
+            RowBox[{"Tensor", "[", 
+             RowBox[{"state", ",", "zero"}], " ", "]"}], "//", "Flatten"}]}], 
+          ";", "\[IndentingNewLine]", 
+          RowBox[{"PTL0", " ", "=", " ", 
+           RowBox[{"Tensor", "[", 
+            RowBox[{"PTL0", ",", "Id2"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"PTR0", " ", "=", " ", 
+           RowBox[{"Tensor", "[", 
+            RowBox[{"Id2", ",", "PTR0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"PTL1", " ", "=", " ", 
+           RowBox[{"Tensor", "[", 
+            RowBox[{"PTL1", ",", "Id2"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"PTR1", " ", "=", " ", 
+           RowBox[{"Tensor", "[", 
+            RowBox[{"Id2", ",", "PTR1"}], "]"}]}], ";"}]}], 
+        "\[IndentingNewLine]", "]"}]}]}], 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{
+       "Good", " ", "to", " ", "know", " ", "Kronecker", " ", "product", " ", 
+        "is", " ", "actually", " ", "outer", " ", "product", " ", "in", " ", 
+        "Mathematica"}], ",", " ", 
+       RowBox[{"hence", " ", "//", "Flatten"}]}], "*)"}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Gates", " ", "are", " ", "functions", " ", "that", " ", "generate", " ", 
+     "a", " ", "matrix"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"NOT", "'"}], "s", " ", "qubits", " ", "given", " ", "as", " ", 
+      "a", " ", "list", " ", "of", " ", "arguments"}], ",", " ", 
+     RowBox[{"eg", " ", 
+      RowBox[{"NOT", "[", "1", "]"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"NOT", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "3"}], "}"}], "]"}], " ", "\[Equal]", " ", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"NOT", "[", "1", "]"}], ".", 
+        RowBox[{"NOT", "[", "3", "]"}]}], " ", 
+       RowBox[{"etc", "."}]}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"NOT", "[", "qbit_", "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"px", ",", "curr"}], "]"}]}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Y", "[", "qbit_", "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"py", ",", "curr"}], "]"}]}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Z", "[", "qbit_", "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"pz", ",", "curr"}], "]"}]}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Hadamard", "'"}], "s", " ", "qubits", " ", "given", " ", "as", 
+      " ", "a", " ", "list", " ", "of", " ", "arguments"}], ",", " ", 
+     RowBox[{"eg", " ", 
+      RowBox[{"HAD", "[", "1", "]"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"HAD", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "3"}], "}"}], "]"}], " ", 
+      RowBox[{"etc", "."}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"HAD", "[", "qbit_", "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"H", ",", "curr"}], "]"}]}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Ph", "[", 
+     RowBox[{"qbit_", ",", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", "=", "Id1"}], ",", 
+        RowBox[{"bits", "=", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{
+                RowBox[{"ph", "[", "\[Theta]", "]"}], ",", "curr"}], "]"}]}], 
+             ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Rotate", "'"}], "s", " ", "qubits", " ", "given", " ", "as", 
+      " ", "a", " ", "list"}], ",", " ", 
+     RowBox[{"by", " ", "angle", " ", "\[Theta]"}], ",", " ", 
+     RowBox[{"eg", " ", 
+      RowBox[{"ROT", "[", 
+       RowBox[{"1", ",", "\[Pi]"}], "]"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"ROT", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"1", ",", "3"}], "}"}], ",", " ", 
+        RowBox[{"\[Pi]", "/", "2"}]}], "]"}], " ", 
+      RowBox[{"etc", "."}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ROTX", "[", 
+     RowBox[{"qbit_", ",", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", "=", "Id1"}], ",", 
+        RowBox[{"bits", "=", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{
+                RowBox[{"RX", "[", "\[Theta]", "]"}], ",", "curr"}], "]"}]}], 
+             ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ROTY", "[", 
+     RowBox[{"qbit_", ",", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", "=", "Id1"}], ",", 
+        RowBox[{"bits", "=", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{
+                RowBox[{"RY", "[", "\[Theta]", "]"}], ",", "curr"}], "]"}]}], 
+             ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ROTZ", "[", 
+     RowBox[{"qbit_", ",", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"curr", "=", "Id1"}], ",", 
+        RowBox[{"bits", "=", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", "qbit", "}"}], "//", "Flatten"}], "]"}], "]"}]}], 
+        ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{
+                RowBox[{"RZ", "[", "\[Theta]", "]"}], ",", "curr"}], "]"}]}], 
+             ",", 
+             RowBox[{"curr", " ", "=", 
+              RowBox[{"Tensor", "[", 
+               RowBox[{"Id2", ",", "curr"}], "]"}]}]}], "]"}]}], "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", "\"\<ERROR Invalid Qubit Specified\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"curr", ",", " ", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Controlled", " ", "Not", " ", "on", " ", "qubit"}], ",", " ", 
+     RowBox[{"controlled", " ", "by", " ", 
+      RowBox[{"con", ":", " ", 
+       RowBox[{
+        RowBox[{"CX", "[", 
+         RowBox[{"1", ",", "3"}], "]"}], " ", "performs", " ", "a", " ", 
+        "controlled", " ", "not", " ", "on", " ", "qubit", " ", "1", " ", 
+        "depending", " ", "on", " ", "the", " ", "value", " ", "of", " ", 
+        "qubit", " ", "3"}]}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CX", "[", 
+     RowBox[{"qbit_", ",", "con_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con"}], "}"}], "//", "Flatten"}], "]"}], 
+          "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "2"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con"}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}]}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"px", ",", "term2"}], "]"}]}], " ", ";"}]}], "]"}], 
+             ",", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CX gate\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"term1", "+", "term2"}], ")"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CH", "[", 
+     RowBox[{"qbit_", ",", "con_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con"}], "}"}], "//", "Flatten"}], "]"}], 
+          "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "2"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con"}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}]}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"H", ",", "term2"}], "]"}]}], " ", ";"}]}], "]"}], 
+             ",", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CH gate\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"term1", "+", "term2"}], ")"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CPh", "[", 
+     RowBox[{"qbit_", ",", "con_", ",", " ", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con"}], "}"}], "//", "Flatten"}], "]"}], 
+          "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "2"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con"}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}]}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{
+                   RowBox[{"ph", "[", "\[Theta]", "]"}], ",", "term2"}], 
+                  "]"}]}], " ", ";"}]}], "]"}], ",", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CROTX gate\>\"", "]"}]}],
+         "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"term1", "+", "term2"}], ")"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CROTX", "[", 
+     RowBox[{"qbit_", ",", "con_", ",", " ", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con"}], "}"}], "//", "Flatten"}], "]"}], 
+          "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "2"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con"}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}]}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{
+                   RowBox[{"RX", "[", "\[Theta]", "]"}], ",", "term2"}], 
+                  "]"}]}], " ", ";"}]}], "]"}], ",", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CROTX gate\>\"", "]"}]}],
+         "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"term1", "+", "term2"}], ")"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CROTY", "[", 
+     RowBox[{"qbit_", ",", "con_", ",", " ", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con"}], "}"}], "//", "Flatten"}], "]"}], 
+          "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "2"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con"}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}]}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{
+                   RowBox[{"RY", "[", "\[Theta]", "]"}], ",", "term2"}], 
+                  "]"}]}], " ", ";"}]}], "]"}], ",", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CROTY gate\>\"", "]"}]}],
+         "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"term1", "+", "term2"}], ")"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CROTZ", "[", 
+     RowBox[{"qbit_", ",", "con_", ",", " ", "\[Theta]_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con"}], "}"}], "//", "Flatten"}], "]"}], 
+          "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "2"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con"}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}]}], ",", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{
+                   RowBox[{"RZ", "[", "\[Theta]", "]"}], ",", "term2"}], 
+                  "]"}]}], " ", ";"}]}], "]"}], ",", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CROTZ gate\>\"", "]"}]}],
+         "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"term1", "+", "term2"}], ")"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Controlled", " ", "Controlled", " ", "Not"}], ",", " ", 
+     RowBox[{
+     "only", " ", "works", " ", "for", " ", "a", " ", "single", " ", "qubit", 
+      " ", "input", " ", "currently"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CCH", "[", 
+     RowBox[{"qbit_", ",", "con1_", ",", "con2_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term3", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term4", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con1", ",", "con2"}], "}"}], "//", 
+            "Flatten"}], "]"}], "]"}]}], ",", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "3"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", "\[IndentingNewLine]", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con1"}], " ", ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", 
+                RowBox[{"term3", " ", "=", " ", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term3"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", " ", 
+                RowBox[{"term4", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term4"}], "]"}]}]}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{"(*", 
+                RowBox[{
+                 RowBox[{"Not", " ", "con1"}], ",", " ", 
+                 RowBox[{"is", " ", "it", " ", 
+                  RowBox[{"con2", "?"}]}]}], "*)"}], "\[IndentingNewLine]", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{"i", "\[Equal]", " ", "con2"}], ",", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{
+                  RowBox[{"term1", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                  "\[IndentingNewLine]", 
+                  RowBox[{"term2", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ZERO", ",", "term2"}], "]"}]}], ";", 
+                  "\[IndentingNewLine]", 
+                  RowBox[{"term3", " ", "=", " ", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ONE", ",", "term3"}], "]"}]}], ";", 
+                  "\[IndentingNewLine]", " ", 
+                  RowBox[{"term4", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ONE", ",", "term4"}], "]"}]}]}], ",", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{"(*", 
+                  RowBox[{
+                   RowBox[{"Not", " ", "con2", " ", "or", " ", "con1"}], ",", 
+                   " ", 
+                   RowBox[{"must", " ", "be", " ", "qbit"}]}], "*)"}], 
+                 "\[IndentingNewLine]", 
+                 RowBox[{
+                  RowBox[{"term1", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                  RowBox[{"term2", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", "term2"}], "]"}]}], " ", ";", 
+                  RowBox[{"term3", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", "term3"}], "]"}]}], ";", 
+                  RowBox[{"term4", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"H", ",", "term4"}], "]"}]}], " ", ";"}]}], 
+                "]"}]}], "]"}], ",", "\[IndentingNewLine]", 
+             RowBox[{"(*", 
+              RowBox[{
+              "Happen", " ", "if", " ", "current", " ", "register", " ", "i", 
+               " ", "is", " ", "not", " ", "involved", " ", "in", " ", "the", 
+               " ", "CCX"}], "*)"}], "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}], ";", 
+              RowBox[{"term3", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term3"}], "]"}]}], ";", 
+              RowBox[{"term4", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term4"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CCH gate\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"term1", "+", "term2", "+", "term3", "+", "term4"}], ",", 
+         " ", "Module"}], "]"}]}]}], "\[IndentingNewLine]", "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Controlled", " ", "Controlled", " ", "Not"}], ",", " ", 
+     RowBox[{
+     "only", " ", "works", " ", "for", " ", "a", " ", "single", " ", "qubit", 
+      " ", "input", " ", "currently"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CCX", "[", 
+     RowBox[{"qbit_", ",", "con1_", ",", "con2_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"term1", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term2", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term3", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"term4", " ", "=", " ", "Id1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"qbit", ",", "con1", ",", "con2"}], "}"}], "//", 
+            "Flatten"}], "]"}], "]"}]}], ",", " ", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", " ", "3"}]}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", "\[IndentingNewLine]", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[Equal]", " ", "con1"}], " ", ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"term1", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", 
+                RowBox[{"term2", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term2"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", 
+                RowBox[{"term3", " ", "=", " ", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ZERO", ",", "term3"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", " ", 
+                RowBox[{"term4", " ", "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"ONE", ",", "term4"}], "]"}]}]}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{"(*", 
+                RowBox[{
+                 RowBox[{"Not", " ", "con1"}], ",", " ", 
+                 RowBox[{"is", " ", "it", " ", 
+                  RowBox[{"con2", "?"}]}]}], "*)"}], "\[IndentingNewLine]", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{"i", "\[Equal]", " ", "con2"}], ",", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{
+                  RowBox[{"term1", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ZERO", ",", "term1"}], "]"}]}], ";", 
+                  "\[IndentingNewLine]", 
+                  RowBox[{"term2", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ZERO", ",", "term2"}], "]"}]}], ";", 
+                  "\[IndentingNewLine]", 
+                  RowBox[{"term3", " ", "=", " ", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ONE", ",", "term3"}], "]"}]}], ";", 
+                  "\[IndentingNewLine]", " ", 
+                  RowBox[{"term4", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"ONE", ",", "term4"}], "]"}]}]}], ",", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{"(*", 
+                  RowBox[{
+                   RowBox[{"Not", " ", "con2", " ", "or", " ", "con1"}], ",", 
+                   " ", 
+                   RowBox[{"must", " ", "be", " ", "qbit"}]}], "*)"}], 
+                 "\[IndentingNewLine]", 
+                 RowBox[{
+                  RowBox[{"term1", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+                  RowBox[{"term2", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", "term2"}], "]"}]}], " ", ";", 
+                  RowBox[{"term3", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", "term3"}], "]"}]}], ";", 
+                  RowBox[{"term4", " ", "=", 
+                   RowBox[{"Tensor", "[", 
+                    RowBox[{"px", ",", "term4"}], "]"}]}], " ", ";"}]}], 
+                "]"}]}], "]"}], ",", "\[IndentingNewLine]", 
+             RowBox[{"(*", 
+              RowBox[{
+              "Happen", " ", "if", " ", "current", " ", "register", " ", "i", 
+               " ", "is", " ", "not", " ", "involved", " ", "in", " ", "the", 
+               " ", "CCX"}], "*)"}], "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"term1", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term1"}], "]"}]}], ";", 
+              RowBox[{"term2", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term2"}], "]"}]}], ";", 
+              RowBox[{"term3", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term3"}], "]"}]}], ";", 
+              RowBox[{"term4", " ", "=", 
+               RowBox[{"Tensor", "[", 
+                RowBox[{"Id2", ",", "term4"}], "]"}]}]}]}], 
+            "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for CCX gate\>\"", "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"term1", "+", "term2", "+", "term3", "+", "term4"}], ",", 
+         " ", "Module"}], "]"}]}]}], "\[IndentingNewLine]", "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ControlGate", "[", 
+     RowBox[{"qbit_", ",", "control_", ",", "gate_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"terms", " ", "=", " ", 
+         RowBox[{"Table", "[", 
+          RowBox[{"Id1", ",", 
+           RowBox[{"{", 
+            RowBox[{"count", ",", "1", ",", 
+             RowBox[{"2", "^", 
+              RowBox[{"Length", "[", "control", "]"}]}]}], "}"}]}], "]"}]}], 
+        ",", 
+        RowBox[{"COUNT", "=", "1"}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"Sort", "[", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"control", ",", "qbit"}], "}"}], "//", "Flatten"}], 
+           "]"}], "]"}]}], ",", "i", ",", "j"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[Equal]", 
+           RowBox[{
+            RowBox[{"Length", "[", "control", "]"}], "+", "1"}]}], " ", "&&", 
+          " ", 
+          RowBox[{
+           RowBox[{"Length", "[", "bits", "]"}], "\[LessEqual]", " ", "q"}]}],
+          ",", "\[IndentingNewLine]", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", "q"}], ",", 
+           RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"ContainsAny", "[", 
+              RowBox[{"bits", ",", 
+               RowBox[{"{", "i", "}"}]}], "]"}], ",", "\[IndentingNewLine]", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"i", "\[NotEqual]", "qbit"}], " ", ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"For", "[", 
+                 RowBox[{
+                  RowBox[{"j", "=", "1"}], ",", 
+                  RowBox[{"j", "\[LessEqual]", " ", 
+                   RowBox[{"Length", "[", "terms", "]"}]}], ",", 
+                  RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"terms", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "=", 
+                    RowBox[{"Tensor", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Sieve", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"COUNT", ",", 
+                    RowBox[{"1", ";;", 
+                    RowBox[{"2", "^", 
+                    RowBox[{"Length", "[", "control", "]"}]}]}]}], "]"}], 
+                    "]"}], "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "*", "ONE"}], "+", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{"1", "-", "Sieve"}], ")"}], "[", 
+                    RowBox[{"[", 
+                    RowBox[{"COUNT", ",", 
+                    RowBox[{"1", ";;", 
+                    RowBox[{"2", "^", 
+                    RowBox[{"Length", "[", "control", "]"}]}]}]}], "]"}], 
+                    "]"}], "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "*", "ZERO"}]}], ",", 
+                    RowBox[{"terms", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}]}], " ", "]"}]}], ";"}]}], 
+                 "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+                " ", 
+                RowBox[{"COUNT", "=", 
+                 RowBox[{"COUNT", "+", "1"}]}]}], ",", "\[IndentingNewLine]", 
+               RowBox[{"(*", 
+                RowBox[{
+                 RowBox[{"Else", " ", "i"}], " ", "\[Equal]", " ", "qbit"}], 
+                "*)"}], "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"For", "[", 
+                 RowBox[{
+                  RowBox[{"j", "=", "1"}], ",", 
+                  RowBox[{"j", "<", " ", 
+                   RowBox[{"Length", "[", "terms", "]"}]}], ",", 
+                  RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"terms", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "=", 
+                    RowBox[{"Tensor", "[", 
+                    RowBox[{"Id2", ",", 
+                    RowBox[{"terms", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}]}], "]"}]}], ";"}]}], 
+                 "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+                RowBox[{
+                 RowBox[{"terms", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"Length", "[", "terms", "]"}], "]"}], "]"}], "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"gate", ",", 
+                   RowBox[{"terms", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"Length", "[", "terms", "]"}], "]"}], "]"}]}], 
+                  "]"}]}]}]}], "\[IndentingNewLine]", "]"}], 
+             RowBox[{"(*", 
+              RowBox[{"If", " ", "qbit"}], "*)"}], "\[IndentingNewLine]", ",", 
+             RowBox[{"(*", 
+              RowBox[{"Else", ",", " ", 
+               RowBox[{"regular", " ", "bit"}]}], "*)"}], 
+             "\[IndentingNewLine]", 
+             RowBox[{"(*", 
+              RowBox[{
+               RowBox[{
+               "Happens", " ", "if", " ", "current", " ", "register", " ", 
+                "i", " ", "is", " ", "not", " ", "involved", " ", "in", " ", 
+                "the", " ", "Control", " ", "multi"}], "-", "gate"}], "*)"}], 
+             "\[IndentingNewLine]", 
+             RowBox[{"For", "[", 
+              RowBox[{
+               RowBox[{"j", "=", "1"}], ",", 
+               RowBox[{"j", "\[LessEqual]", " ", 
+                RowBox[{"Length", "[", "terms", "]"}]}], ",", 
+               RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"terms", "[", 
+                  RowBox[{"[", "j", "]"}], "]"}], "=", 
+                 RowBox[{"Tensor", "[", 
+                  RowBox[{"Id2", ",", 
+                   RowBox[{"terms", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}]}], "]"}]}], ";"}]}], 
+              "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}]}], 
+          RowBox[{"(*", 
+           RowBox[{"If", " ", "contains"}], "*)"}], "\[IndentingNewLine]", 
+          "]"}], 
+         RowBox[{"(*", 
+          RowBox[{"Loop", " ", "through", " ", "bits"}], "*)"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{"(*", 
+          RowBox[{"Else", " ", "ERROR"}], "*)"}], 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specification for ControlGate gate\>\"", 
+          "]"}]}], "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{
+         RowBox[{"Total", "[", "terms", "]"}], ",", " ", "Module"}], 
+        "]"}]}]}], "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CNOT", "[", 
+     RowBox[{"qbit_", ",", "control_"}], "]"}], ":=", 
+    RowBox[{"ControlGate", "[", 
+     RowBox[{"qbit", ",", "control", ",", "px"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CHAD", "[", 
+     RowBox[{"qbit_", ",", "control_"}], "]"}], ":=", 
+    RowBox[{"ControlGate", "[", 
+     RowBox[{"qbit", ",", "control", ",", "H"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"SWAP", "[", 
+     RowBox[{"q1_", ",", "q2_"}], "]"}], ":=", " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"curr", " ", "=", " ", 
+        RowBox[{"IdentityMatrix", "[", "n", "]"}]}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"q1", " ", "\[NotEqual]", " ", "q2"}], ",", " ", 
+         RowBox[{"curr", "=", 
+          RowBox[{
+           RowBox[{"CX", "[", 
+            RowBox[{"q1", ",", "q2"}], "]"}], ".", 
+           RowBox[{"CX", "[", 
+            RowBox[{"q2", ",", "q1"}], "]"}], ".", 
+           RowBox[{"CX", "[", 
+            RowBox[{"q1", ",", "q2"}], "]"}]}]}]}], "]"}], ";", 
+       RowBox[{"Return", "[", "curr", "]"}]}]}], "]"}]}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CSWAP", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "control_"}], "]"}], ":=", " ", 
+    RowBox[{
+     RowBox[{"CCX", "[", 
+      RowBox[{"q1", ",", "q2", ",", "control"}], "]"}], ".", 
+     RowBox[{"CCX", "[", 
+      RowBox[{"q2", ",", "q1", ",", "control"}], "]"}], ".", 
+     RowBox[{"CCX", "[", 
+      RowBox[{"q1", ",", "q2", ",", "control"}], "]"}]}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+     "Recall", " ", "The", " ", "matrix", " ", "multiplication", " ", "is", 
+      " ", "backwards", " ", "from", " ", "the", " ", "circuit", " ", 
+      "presentation"}], ",", " ", 
+     RowBox[{"since", " ", "rightmost", " ", "operators", " ", "act", " ", 
+      RowBox[{"first", "."}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"XOR", "[", 
+     RowBox[{"q1_", ",", "q2_"}], "]"}], ":=", " ", 
+    RowBox[{"CX", "[", 
+     RowBox[{"q1", ",", "q2"}], "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"We", " ", "store", " ", 
+     RowBox[{"q2", "^", "q3"}], " ", "in", " ", "q1"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"AND", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "q3_"}], "]"}], " ", ":=", " ", 
+    RowBox[{"CCX", "[", 
+     RowBox[{"q1", ",", "q2", ",", "q3"}], "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"OR", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "q3_"}], "]"}], ":=", " ", 
+    RowBox[{
+     RowBox[{"NOT", "[", 
+      RowBox[{"{", 
+       RowBox[{"q1", ",", "q2", ",", "q3"}], "}"}], "]"}], ".", 
+     RowBox[{"CCX", "[", 
+      RowBox[{"q1", ",", "q2", ",", "q3"}], "]"}], ".", 
+     RowBox[{"NOT", "[", 
+      RowBox[{"{", 
+       RowBox[{"q2", ",", "q3"}], "}"}], "]"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"NAND", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "q3_"}], "]"}], ":=", " ", 
+    RowBox[{
+     RowBox[{"NOT", "[", "q1", "]"}], ".", 
+     RowBox[{"CCX", "[", 
+      RowBox[{"q1", ",", "q2", ",", "q3"}], "]"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"NOR", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "q3_"}], "]"}], " ", ":=", " ", 
+    RowBox[{
+     RowBox[{"NOT", "[", "q1", "]"}], ".", 
+     RowBox[{"OR", "[", 
+      RowBox[{"q1", ",", "q2", ",", "q3"}], "]"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Using", " ", "worker", " ", "qbit", " ", "q5"}], ",", " ", 
+     RowBox[{"we", " ", "store", " ", 
+      RowBox[{"q2", "^", 
+       RowBox[{"q3", "^", "q4"}]}], " ", "in", " ", "q1"}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"AND3", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "q3_", ",", "q4_", ",", "q5_"}], "]"}], 
+    " ", ":=", " ", 
+    RowBox[{
+     RowBox[{"CCX", "[", 
+      RowBox[{"q1", ",", "q4", ",", "q5"}], "]"}], ".", 
+     RowBox[{"CCX", "[", 
+      RowBox[{"q5", ",", "q2", ",", "q3"}], "]"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"OR3", "[", 
+     RowBox[{"q1_", ",", "q2_", ",", "q3_", ",", "q4_", ",", "q5_"}], "]"}], ":=",
+     " ", 
+    RowBox[{
+     RowBox[{"OR", "[", 
+      RowBox[{"q1", ",", "q4", ",", "q5"}], "]"}], ".", 
+     RowBox[{"OR", "[", 
+      RowBox[{"q5", ",", "q2", ",", "q3"}], "]"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"CAND3", "[", 
+     RowBox[{
+     "q1_", ",", "q2_", ",", "q3_", ",", "q4_", ",", "q5_", ",", "control_"}],
+      "]"}], " ", ":=", " ", 
+    RowBox[{
+     RowBox[{"ControlGate", "[", 
+      RowBox[{"q1", ",", 
+       RowBox[{"{", 
+        RowBox[{"q4", ",", "q5", ",", "control"}], "}"}], ",", "px"}], "]"}], 
+     ".", 
+     RowBox[{"ControlGate", "[", 
+      RowBox[{"q5", ",", 
+       RowBox[{"{", 
+        RowBox[{"q2", ",", "q3", ",", "control"}], "}"}], ",", "px"}], 
+      "]"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Reset", "[", 
+     RowBox[{"state_", ",", "qubit_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"swap", " ", "=", " ", "False"}], ",", " ", "tempstate"}], 
+       "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"qubit", " ", "\[NotEqual]", "  ", "q"}], ",", 
+         RowBox[{"swap", " ", "=", " ", "True"}]}], "]"}], ";", " ", 
+       RowBox[{"If", "[", 
+        RowBox[{"swap", ",", 
+         RowBox[{"tempstate", " ", "=", " ", 
+          RowBox[{
+           RowBox[{"SWAP", "[", 
+            RowBox[{"qubit", ",", "q"}], "]"}], ".", "state"}]}], ",", " ", 
+         RowBox[{"tempstate", "=", "state"}]}], "]"}], ";", 
+       RowBox[{"tempstate", " ", "=", " ", 
+        RowBox[{
+         RowBox[{"Tensor", "[", 
+          RowBox[{"zero", ",", 
+           RowBox[{
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{
+                RowBox[{"Exp", "[", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"Phase", "[", 
+                    RowBox[{"tempstate", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}], "]"}], "-", 
+                    RowBox[{"Phase", "[", 
+                    RowBox[{"tempstate", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"i", "+", 
+                    RowBox[{"n", "/", "2"}]}], "]"}], "]"}], "]"}]}], ")"}], 
+                   "  ", "*", " ", "I"}], " ", "//", "FullSimplify"}], "]"}], 
+                RowBox[{"(", 
+                 RowBox[{"Sqrt", "[", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"Abs", "[", 
+                    RowBox[{"tempstate", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}], "]"}], "^", "2"}], "+", 
+                   RowBox[{
+                    RowBox[{"Abs", "[", 
+                    RowBox[{"tempstate", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"i", "+", 
+                    RowBox[{"n", "/", "2"}]}], "]"}], "]"}], "]"}], "^", 
+                    "2"}]}], "]"}], ")"}]}], " ", "//", "FullSimplify"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"i", ",", "1", ",", 
+                RowBox[{"n", "/", "2"}]}], "}"}]}], "]"}], "//", 
+            "Flatten"}]}], "\[IndentingNewLine]", "]"}], "//", "Flatten"}]}], 
+       ";", 
+       RowBox[{"If", "[", 
+        RowBox[{"swap", ",", 
+         RowBox[{"tempstate", " ", "=", " ", 
+          RowBox[{
+           RowBox[{"SWAP", "[", 
+            RowBox[{"qubit", ",", "q"}], "]"}], ".", "tempstate"}]}]}], "]"}],
+        ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"tempstate", ",", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RESET", "[", 
+     RowBox[{"state_", ",", "qubits_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"tempstate", "=", "state"}], ",", " ", "i"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Length", "[", "qubits", "]"}], "\[Equal]", " ", "0"}], ",", 
+         RowBox[{"tempstate", "=", 
+          RowBox[{"Reset", "[", 
+           RowBox[{"tempstate", ",", "qubits"}], "]"}]}], ",", 
+         RowBox[{"For", "[", 
+          RowBox[{
+           RowBox[{"i", " ", "=", " ", "1"}], ",", " ", 
+           RowBox[{"i", "\[LessEqual]", " ", 
+            RowBox[{"Length", "[", "qubits", "]"}]}], ",", 
+           RowBox[{"i", "++"}], ",", " ", 
+           RowBox[{"tempstate", " ", "=", " ", 
+            RowBox[{"Reset", "[", 
+             RowBox[{"tempstate", ",", " ", 
+              RowBox[{"qubits", "[", 
+               RowBox[{"[", "i", "]"}], "]"}]}], "]"}]}]}], "]"}]}], "]"}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"tempstate", ",", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Quick", " ", "and", " ", "dirty", " ", "QFT", " ", "implimentation"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"nQFT", "[", 
+     RowBox[{"numqbits_", ",", "sign_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"gate", "=", 
+         RowBox[{"IdentityMatrix", "[", 
+          RowBox[{"2", "^", "numqbits"}], "]"}]}], ",", 
+        RowBox[{"\[Omega]", "=", 
+         RowBox[{"Exp", "[", 
+          RowBox[{"2", " ", "I", " ", 
+           RowBox[{"\[Pi]", "/", 
+            RowBox[{"2", "^", "numqbits"}]}]}], "]"}]}]}], "}"}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", "=", "0"}], ",", 
+         RowBox[{"i", "<", 
+          RowBox[{"2", "^", "numqbits"}]}], ",", 
+         RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{"j", "=", "0"}], ",", 
+            RowBox[{"j", "<", 
+             RowBox[{"2", "^", "numqbits"}]}], ",", 
+            RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"gate", "[", 
+              RowBox[{"[", 
+               RowBox[{
+                RowBox[{"i", "+", "1"}], ",", 
+                RowBox[{"j", "+", "1"}]}], "]"}], "]"}], "=", " ", 
+             RowBox[{
+              FractionBox["1", 
+               RowBox[{"Sqrt", "[", 
+                RowBox[{"2", "^", "numqbits"}], "]"}]], 
+              RowBox[{"\[Omega]", "^", 
+               RowBox[{"(", 
+                RowBox[{"sign", "*", "i", "*", "j"}], ")"}]}]}]}]}], 
+           "\[IndentingNewLine]", "]"}], ";"}]}], "\[IndentingNewLine]", 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", "=", 
+          RowBox[{"q", "-", "numqbits"}]}], ",", 
+         RowBox[{"i", ">", "0"}], ",", 
+         RowBox[{"i", "--"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"gate", "=", 
+          RowBox[{"Tensor", "[", 
+           RowBox[{"Id2", ",", "gate"}], "]"}]}]}], "\[IndentingNewLine]", 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", "gate", "]"}]}]}], "\[IndentingNewLine]", 
+     "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"QFT", "[", 
+     RowBox[{"qbits_", ",", "sign_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"swaps", "=", 
+         RowBox[{"{", "}"}]}], ",", 
+        RowBox[{"bits", " ", "=", " ", 
+         RowBox[{"DeleteDuplicates", "[", 
+          RowBox[{
+           RowBox[{"{", "qbits", "}"}], "//", "Flatten"}], "]"}]}], ",", "i", 
+        ",", "j", ",", 
+        RowBox[{"vals", "=", 
+         RowBox[{"Range", "[", "q", "]"}]}], ",", 
+        RowBox[{"temp", "=", "1"}], ",", " ", 
+        RowBox[{"actual", "=", "1"}], ",", " ", 
+        RowBox[{"preswap", "=", 
+         RowBox[{"IdentityMatrix", "[", "n", "]"}]}], ",", 
+        RowBox[{"postswap", "=", 
+         RowBox[{"IdentityMatrix", "[", "n", "]"}]}], ",", " ", "curr"}], 
+       "}"}], ",", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"LessEqualThan", "[", "q", "]"}]}], "]"}], "&&", 
+          RowBox[{"AllSatisfy", "[", 
+           RowBox[{"bits", ",", 
+            RowBox[{"GreaterThan", "[", "0", "]"}]}], "]"}], " ", "&&", " ", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"sign", "*", "sign"}], "\[Equal]", "1"}], ")"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"swaps", ",", 
+            RowBox[{"SWAP", "[", 
+             RowBox[{"1", ",", 
+              RowBox[{"bits", "[", 
+               RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{
+           RowBox[{"vals", "[", 
+            RowBox[{"[", "1", "]"}], "]"}], "=", 
+           RowBox[{"bits", "[", 
+            RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{
+           RowBox[{"vals", "[", 
+            RowBox[{"[", 
+             RowBox[{"bits", "[", 
+              RowBox[{"[", "1", "]"}], "]"}], "]"}], "]"}], "=", "1"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{"i", " ", "=", "2"}], ",", " ", 
+            RowBox[{"i", "\[LessEqual]", " ", 
+             RowBox[{"Length", "[", "bits", "]"}]}], ",", 
+            RowBox[{"i", "++"}], ",", " ", "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"actual", "=", 
+              RowBox[{
+               RowBox[{"Position", "[", 
+                RowBox[{"vals", ",", 
+                 RowBox[{"bits", "[", 
+                  RowBox[{"[", "i", "]"}], "]"}]}], "]"}], "[", 
+               RowBox[{"[", 
+                RowBox[{"1", ",", "1"}], "]"}], "]"}]}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"AppendTo", "[", 
+              RowBox[{"swaps", ",", 
+               RowBox[{"SWAP", "[", 
+                RowBox[{"i", ",", "actual"}], "]"}]}], "]"}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"temp", "=", 
+              RowBox[{"vals", "[", 
+               RowBox[{"[", "i", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"vals", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "=", 
+              RowBox[{"bits", "[", 
+               RowBox[{"[", "i", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"vals", "[", 
+               RowBox[{"[", "actual", "]"}], "]"}], "=", "temp"}], ";"}]}], 
+           "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{"i", " ", "=", " ", "1"}], ",", " ", 
+            RowBox[{"i", "\[LessEqual]", " ", 
+             RowBox[{"Length", "[", "swaps", "]"}]}], ",", 
+            RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"preswap", "=", " ", 
+              RowBox[{
+               RowBox[{"swaps", "[", 
+                RowBox[{"[", "i", "]"}], "]"}], ".", "preswap"}]}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"postswap", "=", " ", 
+              RowBox[{
+               RowBox[{"swaps", "[", 
+                RowBox[{"[", 
+                 RowBox[{
+                  RowBox[{"Length", "[", "swaps", "]"}], "+", "1", "-", "i"}],
+                  "]"}], "]"}], ".", "postswap"}]}], ";"}]}], 
+           "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"curr", "=", 
+           RowBox[{"postswap", ".", 
+            RowBox[{"nQFT", "[", 
+             RowBox[{
+              RowBox[{"Length", "[", "bits", "]"}], ",", "sign"}], "]"}], ".",
+             "preswap"}]}]}], "\[IndentingNewLine]", ",", 
+         RowBox[{
+         "Print", "[", 
+          "\"\<ERROR Invalid Qubit Specified, or invalid sign entered\>\"", 
+          "]"}]}], "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", "curr", "]"}]}]}], "\[IndentingNewLine]", 
+     "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "The", " ", "Following", " ", "functions", " ", "are", " ", "not", " ", 
+     "quantum", " ", "Gates"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Measure", " ", 
+      RowBox[{"states", "'"}], " ", "qbits"}], ",", " ", 
+     RowBox[{"shots", " ", "number", " ", "of", " ", "times"}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Measure", "[", 
+     RowBox[{"state_", ",", " ", "shots_", ",", " ", "qbits_"}], "]"}], ":=", 
+    " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Measurements", "=", 
+         RowBox[{"{", "}"}]}], ",", " ", 
+        RowBox[{"tempstate", "=", "state"}], ",", " ", 
+        RowBox[{"str", "=", "\"\<\>\""}], ",", "i", ",", ",", "prob1", ",", 
+        "j"}], "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", "=", " ", "1"}], ",", " ", 
+         RowBox[{"i", "\[LessEqual]", " ", "shots"}], ",", " ", 
+         RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"j", "=", "1"}], ";", " ", 
+             RowBox[{"str", "=", "\"\<\>\""}]}], ",", 
+            RowBox[{"j", "\[LessEqual]", " ", 
+             RowBox[{"Length", "[", "qbits", "]"}]}], ",", 
+            RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"prob1", "=", 
+              RowBox[{"Total", "[", 
+               RowBox[{
+                RowBox[{"Abs", "[", 
+                 RowBox[{"tempstate", "*", 
+                  RowBox[{"Sieve", "[", 
+                   RowBox[{"[", 
+                    RowBox[{"qbits", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "]"}], "]"}]}], "]"}], 
+                "^", "2"}], "]"}]}], ";", "\[IndentingNewLine]", " ", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"RandomVariate", "[", 
+                 RowBox[{"UniformDistribution", "[", "]"}], "]"}], 
+                "\[LessEqual]", " ", "prob1"}], ",", 
+               RowBox[{
+                RowBox[{"str", "=", 
+                 RowBox[{"\"\<1\>\"", "<>", "str"}]}], ";", 
+                RowBox[{"tempstate", "=", 
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{"tempstate", "*", 
+                    RowBox[{"Sieve", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}]}], ")"}], "/", 
+                  RowBox[{"Sqrt", "[", "prob1", "]"}]}]}]}], ",", 
+               RowBox[{
+                RowBox[{"str", "=", 
+                 RowBox[{"\"\<0\>\"", "<>", "str"}]}], " ", ";", 
+                RowBox[{"tempstate", "=", 
+                 RowBox[{"tempstate", "*", 
+                  RowBox[{
+                   RowBox[{"(", 
+                    RowBox[{"1", "-", 
+                    RowBox[{"Sieve", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"qbits", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "]"}], "]"}]}], ")"}], 
+                   "/", 
+                   RowBox[{"Sqrt", "[", 
+                    RowBox[{"1", "-", "prob1"}], "]"}]}]}]}]}]}], "]"}]}]}], 
+           "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"Measurements", ",", "str"}], "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"tempstate", "=", "state"}], ";"}]}], "\[IndentingNewLine]",
+         "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"Measurements", ",", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Measure", "[", 
+     RowBox[{"state_", ",", " ", "shots_"}], "]"}], ":=", " ", 
+    RowBox[{"Return", "[", 
+     RowBox[{"Measure", "[", 
+      RowBox[{"state", ",", " ", "shots", ",", " ", "all"}], "]"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Phase", "[", "x_", "]"}], ":=", " ", 
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"x", " ", "\[Equal]", " ", "0"}], ",", " ", 
+      RowBox[{"Return", "[", "0", "]"}], ",", 
+      RowBox[{"Return", "[", 
+       RowBox[{
+        RowBox[{"Log", "[", 
+         RowBox[{
+          RowBox[{"x", "/", 
+           RowBox[{"Size", "[", "x", "]"}]}], "//", "FullSimplify"}], "]"}], 
+        "/", "I"}], "]"}]}], "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"For", " ", "Plotting", " ", "Probabilities"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"BarPlot", "[", 
+     RowBox[{"M_", ",", " ", "shots_"}], "]"}], ":=", " ", 
+    RowBox[{"BarChart", "[", 
+     RowBox[{
+      RowBox[{"Table", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Count", "[", 
+          RowBox[{"M", ",", 
+           RowBox[{
+            RowBox[{"Sort", "[", 
+             RowBox[{"DeleteDuplicates", "[", "M", "]"}], "]"}], "[", 
+            RowBox[{"[", "i", "]"}], "]"}]}], "]"}], "/", "shots"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"i", ",", " ", "1", ",", " ", 
+          RowBox[{"Length", "[", 
+           RowBox[{"Sort", "[", 
+            RowBox[{"DeleteDuplicates", "[", "M", "]"}], "]"}], "]"}]}], 
+         "}"}]}], "]"}], ",", " ", 
+      RowBox[{"ChartLabels", "\[Rule]", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"ToString", "[", 
+          RowBox[{
+           RowBox[{"Sort", "[", 
+            RowBox[{"DeleteDuplicates", "[", "M", "]"}], "]"}], "[", 
+           RowBox[{"[", "i", "]"}], "]"}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", " ", "1", ",", " ", 
+           RowBox[{"Length", "[", 
+            RowBox[{"Sort", "[", 
+             RowBox[{"DeleteDuplicates", "[", "M", "]"}], "]"}], "]"}]}], 
+          "}"}]}], "]"}]}]}], "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"BarPlot", "[", 
+     RowBox[{"M_", ",", " ", "shots_", ",", " ", "all_"}], "]"}], ":=", 
+    RowBox[{"If", "[", 
+     RowBox[{"all", ",", " ", 
+      RowBox[{"Return", "[", 
+       RowBox[{"BarChart", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{"Count", "[", 
+             RowBox[{"M", ",", 
+              RowBox[{"bases", "[", 
+               RowBox[{"[", 
+                RowBox[{
+                 RowBox[{"StringLength", "[", 
+                  RowBox[{"M", "[", 
+                   RowBox[{"[", "1", "]"}], "]"}], "]"}], ",", "i"}], "]"}], 
+               "]"}]}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", " ", "1", ",", " ", 
+              RowBox[{"2", "^", 
+               RowBox[{"StringLength", "[", 
+                RowBox[{"M", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}], "]"}]}]}], "}"}]}], "]"}], 
+          "/", "shots"}], ",", " ", 
+         RowBox[{"ChartLabels", "\[Rule]", 
+          RowBox[{"bases", "[", 
+           RowBox[{"[", 
+            RowBox[{"StringLength", "[", 
+             RowBox[{"M", "[", 
+              RowBox[{"[", "1", "]"}], "]"}], "]"}], "]"}], "]"}]}]}], "]"}], 
+       "]"}], ",", 
+      RowBox[{"Return", "[", 
+       RowBox[{"BarPlot", "[", 
+        RowBox[{"M", ",", "shots"}], "]"}], "]"}]}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Force", " ", "a", " ", "state", " ", "into", " ", "1", " ", "or", " ", 
+     "0"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ForceMeasure", "[", 
+     RowBox[{"state_", ",", "qbit_", ",", "bit_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"bit", " ", "\[Equal]", " ", "0"}], ",", 
+        RowBox[{"Return", "[", 
+         RowBox[{
+          RowBox[{"state", "*", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"Sieve", "[", 
+               RowBox[{"[", "q", "]"}], "]"}]}], ")"}], "/", 
+            RowBox[{"Sqrt", "[", 
+             RowBox[{"Total", "[", 
+              RowBox[{
+               RowBox[{"Abs", "[", 
+                RowBox[{"state", "*", 
+                 RowBox[{"(", 
+                  RowBox[{"1", "-", 
+                   RowBox[{"Sieve", "[", 
+                    RowBox[{"[", "q", "]"}], "]"}]}], ")"}]}], "]"}], "^", 
+               "2"}], "]"}], "]"}]}]}], ",", "Module"}], "]"}], ",", 
+        RowBox[{"Return", "[", 
+         RowBox[{
+          RowBox[{"state", "*", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{"Sieve", "[", 
+              RowBox[{"[", "q", "]"}], "]"}], ")"}], "/", 
+            RowBox[{"Sqrt", "[", 
+             RowBox[{"Total", "[", 
+              RowBox[{
+               RowBox[{"Abs", "[", 
+                RowBox[{"state", "*", 
+                 RowBox[{"(", 
+                  RowBox[{"Sieve", "[", 
+                   RowBox[{"[", "q", "]"}], "]"}], ")"}]}], "]"}], "^", "2"}],
+               "]"}], "]"}]}]}], ",", "Module"}], "]"}]}], "]"}]}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Return", " ", "length", " ", "of", " ", "vector"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Size", "[", "state_", "]"}], ":=", 
+    RowBox[{"Return", "[", 
+     RowBox[{
+      RowBox[{"Sqrt", "[", 
+       RowBox[{"Total", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", "state", "]"}], "^", "2"}], "]"}], "]"}], " ", "//",
+       "FullSimplify"}], "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Return", " ", "Density", " ", "matrix", " ", "of", " ", "state"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Density", "[", "state_", "]"}], ":=", " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"State", "=", 
+        RowBox[{"state", "//", "Flatten"}]}], "}"}], ",", 
+      RowBox[{"Return", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"State", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "}"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", "1", ",", "n"}], "}"}]}], "]"}], ".", 
+          RowBox[{"Transpose", "[", 
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"State", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"i", ",", "1", ",", "n"}], "}"}]}], "]"}], "]"}]}], "//",
+          "FullSimplify"}], ",", " ", "Module"}], "]"}]}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Probs", "[", 
+     RowBox[{"state_", ",", "qubits_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"probs", " ", "=", 
+         RowBox[{"{", "}"}]}], ",", " ", "prob", ",", " ", "i", ",", " ", "j",
+         ",", "b", ",", "MeasStates", ",", 
+        RowBox[{"Q", " ", "=", " ", 
+         RowBox[{"Length", "[", "qubits", "]"}]}]}], "}"}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"j", "=", "0"}], ";", 
+          RowBox[{"MeasStates", "=", 
+           RowBox[{"{", "}"}]}]}], ",", 
+         RowBox[{"j", "\[LessEqual]", " ", 
+          RowBox[{
+           RowBox[{"2", "^", "Q"}], "-", "1"}]}], ",", 
+         RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"AppendTo", "[", 
+          RowBox[{"MeasStates", ",", 
+           RowBox[{"Reverse", "[", 
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{"Mod", "[", 
+               RowBox[{
+                RowBox[{"Floor", "[", 
+                 RowBox[{"j", "/", 
+                  RowBox[{"2", "^", "i"}]}], "]"}], ",", "2"}], "]"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"i", ",", "0", ",", 
+                RowBox[{"Q", "-", "1"}]}], "}"}]}], "]"}], "]"}]}], "]"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", " ", "=", " ", "1"}], ",", 
+         RowBox[{"i", " ", "\[LessEqual]", " ", 
+          RowBox[{"2", "^", "Q"}]}], ",", 
+         RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"prob", "=", "state"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{"j", "=", "1"}], ",", 
+            RowBox[{"j", "\[LessEqual]", " ", "Q"}], ",", " ", 
+            RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"prob", "*=", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"(", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"(", 
+                    RowBox[{"-", "1"}], ")"}], "^", "b"}], 
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{"1", "-", "b"}], ")"}], "-", 
+                    RowBox[{"Sieve", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"qubits", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "]"}], "]"}]}], ")"}]}], 
+                 ")"}], "/.", 
+                RowBox[{"{", 
+                 RowBox[{"b", "\[Rule]", " ", 
+                  RowBox[{"MeasStates", "[", 
+                   RowBox[{"[", 
+                    RowBox[{"i", ",", "j"}], "]"}], "]"}]}], "}"}]}], ")"}]}],
+              ";"}]}], "\[IndentingNewLine]", "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"probs", ",", 
+            RowBox[{
+             RowBox[{"Total", "[", 
+              RowBox[{
+               RowBox[{"Abs", "[", "prob", "]"}], "^", "2"}], "]"}], " ", "//",
+              "FullSimplify"}]}], "]"}]}]}], "\[IndentingNewLine]", "]"}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"probs", " ", ",", "Module"}], "]"}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ProbPlot", "[", "state_", "]"}], ":=", 
+    RowBox[{"BarChart", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"Abs", "[", "state", "]"}], "^", "2"}], "//", 
+       "FullSimplify"}], ",", " ", 
+      RowBox[{"ChartLabels", "\[Rule]", 
+       RowBox[{"bases", "[", 
+        RowBox[{"[", 
+         RowBox[{"Max", "[", 
+          RowBox[{
+           RowBox[{"Log", "[", 
+            RowBox[{"2", ",", 
+             RowBox[{"Length", "[", "state", "]"}]}], "]"}], ",", "1"}], 
+          "]"}], "]"}], "]"}]}]}], "]"}]}]}]}]], "Input",
+ CellChangeTimes->{{3.8507403774864073`*^9, 3.850740383551611*^9}, {
+   3.8507405616011534`*^9, 3.8507405842808475`*^9}, {3.8507406630638003`*^9, 
+   3.850740829023013*^9}, {3.850740865771551*^9, 3.8507408959927936`*^9}, {
+   3.850740935459473*^9, 3.850740945201437*^9}, {3.850741271004215*^9, 
+   3.8507413029291477`*^9}, {3.85074133607333*^9, 3.8507413521450553`*^9}, {
+   3.850741383422285*^9, 3.8507413861416836`*^9}, {3.8507414508992124`*^9, 
+   3.850741513072956*^9}, {3.8507415614271135`*^9, 3.8507416119986277`*^9}, {
+   3.8507416762345824`*^9, 3.850741720999999*^9}, {3.850742262081822*^9, 
+   3.8507422649374743`*^9}, {3.8507423514423857`*^9, 
+   3.8507423514501424`*^9}, {3.85074360517304*^9, 3.850743635408082*^9}, {
+   3.850744061878287*^9, 3.850744078173937*^9}, {3.850744483355792*^9, 
+   3.850744485804273*^9}, {3.8507445323681765`*^9, 3.8507445339658265`*^9}, {
+   3.850747363753045*^9, 3.850747371504402*^9}, {3.8507474062751904`*^9, 
+   3.8507474073464575`*^9}, {3.850748651213875*^9, 3.850748651314248*^9}, {
+   3.85074931580746*^9, 3.8507493462410583`*^9}, {3.8507494886468105`*^9, 
+   3.8507494950569835`*^9}, {3.850749598411275*^9, 3.850749601102629*^9}, {
+   3.8507496810811167`*^9, 3.8507496857477207`*^9}, {3.850749776707342*^9, 
+   3.8507498147392235`*^9}, {3.8507516303767486`*^9, 3.85075163047125*^9}, {
+   3.8507517116527853`*^9, 3.850751712553152*^9}, {3.8507529668762703`*^9, 
+   3.850753002429759*^9}, {3.850754071682829*^9, 3.8507540971090446`*^9}, {
+   3.8507566164635196`*^9, 3.850756721849157*^9}, {3.850768489291917*^9, 
+   3.850768489373868*^9}, {3.8507693118841085`*^9, 3.8507693379100513`*^9}, {
+   3.8507704799099655`*^9, 3.8507704923614206`*^9}, {3.8507716536138525`*^9, 
+   3.8507716536748734`*^9}, {3.8507773350456553`*^9, 
+   3.8507773353076544`*^9}, {3.8507776137954063`*^9, 3.850777613939369*^9}, {
+   3.8507864043375196`*^9, 3.850786404557042*^9}, {3.850786607614299*^9, 
+   3.850786607681383*^9}, {3.85082193822995*^9, 3.8508222279294577`*^9}, {
+   3.8508222825284505`*^9, 3.850822341767397*^9}, {3.850822802173026*^9, 
+   3.8508228100159073`*^9}, {3.85082285174168*^9, 3.8508228577279696`*^9}, {
+   3.8509530901582303`*^9, 3.8509530975440683`*^9}, {3.8513698017317314`*^9, 
+   3.8513698709023085`*^9}, {3.851370165584901*^9, 3.8513701687086496`*^9}, 
+   3.851370209719534*^9, {3.8513704524182277`*^9, 3.8513704688683505`*^9}, {
+   3.851370784454568*^9, 3.8513707867484703`*^9}, {3.894416984442133*^9, 
+   3.8944170204246798`*^9}, {3.8944176889938297`*^9, 
+   3.8944176901183367`*^9}, {3.894417722027225*^9, 3.894417799351872*^9}, {
+   3.894417944396302*^9, 3.8944179993329363`*^9}, {3.894418050452783*^9, 
+   3.8944180510318193`*^9}},
+ CellLabel->
+  "In[1294]:=",ExpressionUUID->"31d148f6-db0e-491f-ba26-cbbb7afdf1f2"],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{
+  "**", "**", "**", "**", "**", "**", "**", "**", "**", "**", "**", "**"}], 
+  "******)"}]], "Input",
+ CellChangeTimes->{{3.851612435080043*^9, 3.851612437869666*^9}},
+ CellLabel->"In[72]:=",ExpressionUUID->"6b486786-2375-4f62-88c9-819b666309e4"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QFT", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"1", ",", "3", ",", "4"}], "}"}], ",", 
+    RowBox[{"-", "1"}]}], "]"}], ".", 
+  RowBox[{"QFT", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"1", ",", "3", ",", "4"}], "}"}], ",", "1"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.8944180162437*^9, 3.894418032135751*^9}},
+ CellLabel->
+  "In[1293]:=",ExpressionUUID->"6c6a61c1-5e96-4d7f-99dd-594da3149210"],
+
+Cell[BoxData[
+ RowBox[{"curr$63467", ".", "curr$63470"}]], "Output",
+ CellChangeTimes->{{3.8944180290344143`*^9, 3.894418032626729*^9}},
+ CellLabel->
+  "Out[1293]=",ExpressionUUID->"36e9c9c8-a32e-41c1-b00d-f8cffdf731e3"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "Instantiate", " ", "the", " ", "number", " ", "of", " ", "Qbits"}], 
+   "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"sets", " ", "state", " ", "variable", " ", "to"}], " ", "|", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"00", "..."}], "0"}], ">"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"Qubits", "[", "4", "]"}]}]], "Input",
+ CellChangeTimes->{{3.894151696213573*^9, 3.89415169842684*^9}, {
+  3.894152173100768*^9, 3.8941521732908773`*^9}, {3.894154169814443*^9, 
+  3.894154169917852*^9}, {3.894154264884965*^9, 3.8941542649435062`*^9}, {
+  3.89441487433392*^9, 3.894414875649184*^9}, {3.8944170907802153`*^9, 
+  3.894417120460096*^9}, {3.8944171788576317`*^9, 3.894417191967284*^9}},
+ CellLabel->
+  "In[1291]:=",ExpressionUUID->"6f0c5156-1d6d-4132-a0f4-8211e5328b2f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "qubits", " ", "are", " ", "simply", " ", "identified", " ", "with", " ", 
+    "integers"}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+    "to", " ", "hadamard", " ", "qbits", " ", "1", " ", "and", " ", "3"}], 
+    ",", " ", 
+    RowBox[{"on", " ", "the", " ", "state"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+    "All", " ", "quantum", " ", "gates", " ", "are", " ", "fully", " ", 
+     "upercase", " ", "modules", " ", "and", " ", "return", " ", "a", " ", 
+     "unitary", " ", "matrix"}], ",", " ", 
+    RowBox[{
+    "which", " ", "may", " ", "act", " ", "on", " ", "the", " ", "state", " ",
+      "by", " ", "matrix", " ", "multiplication"}]}], "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"S", "=", 
+     RowBox[{
+      RowBox[{"HAD", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "3"}], "}"}], "]"}], ".", "state"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+     "We", " ", "may", " ", "perform", " ", "a", " ", "controlled", " ", 
+      "not", " ", "on", " ", "qubit", " ", "4"}], ",", " ", 
+     RowBox[{
+     "based", " ", "on", " ", "the", " ", "values", " ", "of", " ", "1"}], 
+     ",", "3"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"S", "=", 
+     RowBox[{
+      RowBox[{"CNOT", "[", 
+       RowBox[{"4", ",", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", "3"}], "}"}]}], "]"}], ".", "S"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "We", " ", "may", " ", "perform", " ", "a", " ", "quantum", " ", 
+     "fourier", " ", "transform", " ", "on", " ", "selected", " ", 
+     RowBox[{"variable", ".", " ", "Order"}], " ", "matters", " ", "for", " ",
+      "QFTs"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"S", "=", 
+     RowBox[{
+      RowBox[{"QFT", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "2", ",", "4"}], "}"}], "]"}], ".", "S"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "We", " ", "may", " ", "reset", " ", "some", " ", "statevectors", " ", 
+     "qubits", " ", "selectively"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"S", "=", 
+     RowBox[{"RESET", "[", 
+      RowBox[{"S", ",", 
+       RowBox[{"{", "3", "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "We", " ", "may", " ", "plot", " ", "the", " ", "probabilities", " ", 
+     "of", " ", "the", " ", "states"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{"ProbPlot", "[", "S", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.8944171388066587`*^9, 3.8944171741620197`*^9}, {
+  3.894417279604555*^9, 3.894417589939239*^9}},
+ CellLabel->
+  "In[1362]:=",ExpressionUUID->"ec110d35-a6be-4987-b4f4-0f896e0c27df"],
+
+Cell[BoxData[
+ GraphicsBox[{
+   {Opacity[0], 
+    PointBox[{{0.2567084078711986, 0.}, {16.426241915508463`, 0.}}]}, {{}, 
+    {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+     Thickness[Small]}], 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{0.5737580844915371, 0.}, {1.426241915508463, 0.25}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{31.03957465339077, 
+            48.45099608470839}, {-103.21819631415995`, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 4]]& ,
+         TagBoxNote->"1/4"],
+        StyleBox[
+         FractionBox["1", "4"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 4], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{1.573758084491537, 0.}, {2.426241915508463, 0.125}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{50.87739540260549, 
+            68.28881683392311}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{2.573758084491537, 0.}, {3.426241915508463, 0.125}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{70.71521615182021, 
+            88.12663758313784}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{3.573758084491537, 0.}, {4.426241915508463, 0.125}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{90.55303690103494, 
+            107.96445833235256`}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{4.573758084491537, 0.}, {5.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{110.39085765024964`, 127.80227908156729`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{5.573758084491537, 0.}, {6.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{130.22867839946437`, 147.640099830782}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{6.573758084491537, 0.}, {7.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{150.0664991486791, 167.47792057999672`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{7.573758084491537, 0.}, {8.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{169.9043198978938, 187.31574132921145`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{8.573758084491537, 0.}, {9.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{189.74214064710853`, 207.15356207842615`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{9.573758084491537, 0.}, {10.426241915508463`, 
+             0.125}, "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{209.57996139632326`, 
+            226.99138282764088`}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{10.573758084491537`, 0.}, {11.426241915508463`, 
+             0.125}, "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{229.41778214553798`, 
+            246.8292035768556}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{11.573758084491537`, 0.}, {12.426241915508463`, 
+             0.125}, "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{249.25560289475268`, 
+            266.66702432607036`}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{12.573758084491537`, 0.}, {13.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           ImageSizeCache->{{269.0934236439674, 286.50484507528506`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{13.573758084491537`, 0.}, {14.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{288.9312443931821, 306.34266582449976`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{14.573758084491537`, 0.}, {15.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{308.76906514239687`, 326.18048657371446`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{15.573758084491537`, 0.}, {16.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{328.60688589161157`, 346.0183073229292}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}}, {}, {}}, {}, {}, {}, {}, 
+   StyleBox[
+    StyleBox[{
+      {Thickness[Tiny], 
+       LineBox[{{0.2567084078711986, 0.}, {16.749632585661207`, 0.}}], 
+       StyleBox[{}, "GraphicsLabel",
+        StripOnInput->False]}, 
+      StyleBox[{
+        {Thickness[Tiny], 
+         LineBox[{{0.5737580844915371, 0.}, 
+           Offset[{-1.102182119232618*^-15, -6.}, {0.5737580844915371, 0.}]}],
+          LineBox[{{16.426241915508463`, 0.}, 
+           Offset[{-1.102182119232618*^-15, -6.}, {16.426241915508463`, 
+            0.}]}], {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, \
+{}, {}, {LineBox[{{1.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {1.426241915508463, 
+              0.}]}], LineBox[{{1.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {1.573758084491537, 
+              0.}]}], LineBox[{{2.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {2.426241915508463, 
+              0.}]}], LineBox[{{2.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {2.573758084491537, 
+              0.}]}], 
+           LineBox[{{3.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {3.426241915508463, 
+              0.}]}], LineBox[{{3.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {3.573758084491537, 
+              0.}]}], LineBox[{{4.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {4.426241915508463, 
+              0.}]}], LineBox[{{4.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {4.573758084491537, 
+              0.}]}], LineBox[{{5.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {5.426241915508463, 
+              0.}]}], LineBox[{{5.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {5.573758084491537, 
+              0.}]}], LineBox[{{6.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {6.426241915508463, 
+              0.}]}], LineBox[{{6.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {6.573758084491537, 
+              0.}]}], LineBox[{{7.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {7.426241915508463, 
+              0.}]}], LineBox[{{7.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {7.573758084491537, 
+              0.}]}], LineBox[{{8.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {8.426241915508463, 
+              0.}]}], LineBox[{{8.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {8.573758084491537, 
+              0.}]}], LineBox[{{9.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {9.426241915508463, 
+              0.}]}], LineBox[{{9.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {9.573758084491537, 
+              0.}]}], LineBox[{{10.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {10.426241915508463`, 
+              0.}]}], LineBox[{{10.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {10.573758084491537`, 
+              0.}]}], LineBox[{{11.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {11.426241915508463`, 
+              0.}]}], LineBox[{{11.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {11.573758084491537`, 
+              0.}]}], LineBox[{{12.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {12.426241915508463`, 
+              0.}]}], LineBox[{{12.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {12.573758084491537`, 
+              0.}]}], LineBox[{{13.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {13.426241915508463`, 
+              0.}]}], LineBox[{{13.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {13.573758084491537`, 
+              0.}]}], LineBox[{{14.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {14.426241915508463`, 
+              0.}]}], LineBox[{{14.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {14.573758084491537`, 
+              0.}]}], LineBox[{{15.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {15.426241915508463`, 
+              0.}]}], LineBox[{{15.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {15.573758084491537`, 
+              0.}]}]}, {}}}, 
+        StyleBox[
+         {Thickness[Tiny], 
+          InsetBox["\<\"0000\"\>", Offset[{0, -2}, {1., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0001\"\>", Offset[{0, -2}, {2., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0010\"\>", Offset[{0, -2}, {3., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0011\"\>", Offset[{0, -2}, {4., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0100\"\>", Offset[{0, -2}, {5., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0101\"\>", Offset[{0, -2}, {6., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0110\"\>", Offset[{0, -2}, {7., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0111\"\>", Offset[{0, -2}, {8., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1000\"\>", Offset[{0, -2}, {9., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1001\"\>", Offset[{0, -2}, {10., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1010\"\>", Offset[{0, -2}, {11., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1011\"\>", Offset[{0, -2}, {12., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1100\"\>", Offset[{0, -2}, {13., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1101\"\>", Offset[{0, -2}, {14., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1110\"\>", Offset[{0, -2}, {15., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1111\"\>", Offset[{0, -2}, {16., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}]}, 
+         "GraphicsLabel",
+         StripOnInput->False]}, "GraphicsTicks",
+       StripOnInput->False]},
+     Antialiasing->False], "GraphicsAxes",
+    StripOnInput->False]},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{False, True},
+  AxesLabel->{None, None},
+  AxesOrigin->{0.2567084078711986, 0.},
+  CoordinatesToolOptions:>{"DisplayFunction" -> ({
+      Identity[
+       Part[#, 1]], 
+      Identity[
+       Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+      Identity[
+       Part[#, 1]], 
+      Identity[
+       Part[#, 2]]}& )},
+  DisplayFunction->Identity,
+  FrameLabel->{{None, None}, {None, None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  PlotRange->{{All, All}, {All, All}},
+  PlotRangePadding->{{
+     Scaled[0.02], 
+     Scaled[0.02]}, {
+     Scaled[0.02], 
+     Scaled[0.05]}},
+  Ticks->{None, Automatic}]], "Output",
+ CellChangeTimes->{3.894417590927845*^9, 3.894418154749032*^9},
+ CellLabel->
+  "Out[1366]=",ExpressionUUID->"8dafa102-869f-4a59-9a58-038df6788ad5"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+    "We", " ", "may", " ", "combine", " ", "this", " ", "all", " ", "into", 
+     " ", "one", " ", "line"}], ",", " ", 
+    RowBox[{
+    "which", " ", "has", " ", "the", " ", "usual", " ", "quirk", " ", "of", 
+     " ", "matrix", " ", "multiplication", " ", "where", " ", "reading", " ", 
+     "the", " ", "circuit", " ", "order", " ", "of", " ", "operations", " ", 
+     "should", " ", "be", " ", "done", " ", "right", " ", "to", " ", 
+     "left"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"S", "=", 
+     RowBox[{
+      RowBox[{"QFT", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "2", ",", "4"}], "}"}], "]"}], ".", 
+      RowBox[{"CNOT", "[", 
+       RowBox[{"4", ",", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", "3"}], "}"}]}], "]"}], ".", 
+      RowBox[{"HAD", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "3"}], "}"}], "]"}], ".", "state"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+     "A", " ", "reset", " ", "is", " ", "not", " ", "a", " ", "quantum", " ", 
+      "gate"}], ",", " ", 
+     RowBox[{
+     "so", " ", "it", " ", "has", " ", "to", " ", "be", " ", "treated", " ", 
+      "separately"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"S", "=", 
+     RowBox[{"RESET", "[", 
+      RowBox[{"S", ",", 
+       RowBox[{"{", "3", "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"ProbPlot", "[", "S", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.894418280707004*^9, 3.894418373151022*^9}, {
+  3.894418408090846*^9, 3.894418433919857*^9}},
+ CellLabel->
+  "In[1370]:=",ExpressionUUID->"1677a190-a2ff-4221-9928-1b046bedeeef"],
+
+Cell[BoxData[
+ GraphicsBox[{
+   {Opacity[0], 
+    PointBox[{{0.2567084078711986, 0.}, {16.426241915508463`, 0.}}]}, {{}, 
+    {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+     Thickness[Small]}], 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{0.5737580844915371, 0.}, {1.426241915508463, 0.25}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{31.03957465339077, 
+            48.45099608470839}, {-103.21819631415995`, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 4]]& ,
+         TagBoxNote->"1/4"],
+        StyleBox[
+         FractionBox["1", "4"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 4], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{1.573758084491537, 0.}, {2.426241915508463, 0.125}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{50.87739540260549, 
+            68.28881683392311}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{2.573758084491537, 0.}, {3.426241915508463, 0.125}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{70.71521615182021, 
+            88.12663758313784}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{3.573758084491537, 0.}, {4.426241915508463, 0.125}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{90.55303690103494, 
+            107.96445833235256`}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{4.573758084491537, 0.}, {5.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{110.39085765024964`, 127.80227908156729`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{5.573758084491537, 0.}, {6.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{130.22867839946437`, 147.640099830782}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{6.573758084491537, 0.}, {7.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{150.0664991486791, 167.47792057999672`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{7.573758084491537, 0.}, {8.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{169.9043198978938, 187.31574132921145`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{8.573758084491537, 0.}, {9.426241915508463, 0.}, 
+             "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{189.74214064710853`, 207.15356207842615`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{9.573758084491537, 0.}, {10.426241915508463`, 
+             0.125}, "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{209.57996139632326`, 
+            226.99138282764088`}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{10.573758084491537`, 0.}, {11.426241915508463`, 
+             0.125}, "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{229.41778214553798`, 
+            246.8292035768556}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{11.573758084491537`, 0.}, {12.426241915508463`, 
+             0.125}, "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{249.25560289475268`, 
+            266.66702432607036`}, {-5.272422035847555, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 
+          Rational[1, 8]]& ,
+         TagBoxNote->"1/8"],
+        StyleBox[
+         FractionBox["1", "8"], {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[
+         Rational[1, 8], {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{12.573758084491537`, 0.}, {13.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           ImageSizeCache->{{269.0934236439674, 286.50484507528506`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{13.573758084491537`, 0.}, {14.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{288.9312443931821, 306.34266582449976`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{14.573758084491537`, 0.}, {15.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{308.76906514239687`, 326.18048657371446`}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}, 
+     {RGBColor[0.982864, 0.7431472, 0.3262672], EdgeForm[{Opacity[0.588], 
+      Thickness[Small]}], 
+      TagBox[
+       TooltipBox[
+        TagBox[
+         TagBox[
+          DynamicBox[{
+            FEPrivate`If[
+             CurrentValue["MouseOver"], 
+             EdgeForm[{
+               GrayLevel[0.5], 
+               AbsoluteThickness[1.5], 
+               Opacity[0.66]}], {}, {}], 
+            
+            RectangleBox[{15.573758084491537`, 0.}, {16.426241915508463`, 0.},
+              "RoundingRadius" -> 0]},
+           
+           ImageSizeCache->{{328.60688589161157`, 346.0183073229292}, {
+            92.67335224246484, 93.17335224246484}}],
+          "DelayedMouseEffectStyle"],
+         StatusArea[#, 0]& ,
+         TagBoxNote->"0"],
+        StyleBox["0", {}, StripOnInput -> False]],
+       Annotation[#, 
+        Style[0, {}], "Tooltip"]& ]}}, {}, {}}, {}, {}, {}, {}, 
+   StyleBox[
+    StyleBox[{
+      {Thickness[Tiny], 
+       LineBox[{{0.2567084078711986, 0.}, {16.749632585661207`, 0.}}], 
+       StyleBox[{}, "GraphicsLabel",
+        StripOnInput->False]}, 
+      StyleBox[{
+        {Thickness[Tiny], 
+         LineBox[{{0.5737580844915371, 0.}, 
+           Offset[{-1.102182119232618*^-15, -6.}, {0.5737580844915371, 0.}]}],
+          LineBox[{{16.426241915508463`, 0.}, 
+           Offset[{-1.102182119232618*^-15, -6.}, {16.426241915508463`, 
+            0.}]}], {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, \
+{}, {}, {LineBox[{{1.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {1.426241915508463, 
+              0.}]}], LineBox[{{1.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {1.573758084491537, 
+              0.}]}], LineBox[{{2.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {2.426241915508463, 
+              0.}]}], LineBox[{{2.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {2.573758084491537, 
+              0.}]}], 
+           LineBox[{{3.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {3.426241915508463, 
+              0.}]}], LineBox[{{3.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {3.573758084491537, 
+              0.}]}], LineBox[{{4.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {4.426241915508463, 
+              0.}]}], LineBox[{{4.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {4.573758084491537, 
+              0.}]}], LineBox[{{5.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {5.426241915508463, 
+              0.}]}], LineBox[{{5.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {5.573758084491537, 
+              0.}]}], LineBox[{{6.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {6.426241915508463, 
+              0.}]}], LineBox[{{6.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {6.573758084491537, 
+              0.}]}], LineBox[{{7.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {7.426241915508463, 
+              0.}]}], LineBox[{{7.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {7.573758084491537, 
+              0.}]}], LineBox[{{8.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {8.426241915508463, 
+              0.}]}], LineBox[{{8.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {8.573758084491537, 
+              0.}]}], LineBox[{{9.426241915508463, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {9.426241915508463, 
+              0.}]}], LineBox[{{9.573758084491537, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {9.573758084491537, 
+              0.}]}], LineBox[{{10.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {10.426241915508463`, 
+              0.}]}], LineBox[{{10.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {10.573758084491537`, 
+              0.}]}], LineBox[{{11.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {11.426241915508463`, 
+              0.}]}], LineBox[{{11.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {11.573758084491537`, 
+              0.}]}], LineBox[{{12.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {12.426241915508463`, 
+              0.}]}], LineBox[{{12.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {12.573758084491537`, 
+              0.}]}], LineBox[{{13.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {13.426241915508463`, 
+              0.}]}], LineBox[{{13.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {13.573758084491537`, 
+              0.}]}], LineBox[{{14.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {14.426241915508463`, 
+              0.}]}], LineBox[{{14.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {14.573758084491537`, 
+              0.}]}], LineBox[{{15.426241915508463`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {15.426241915508463`, 
+              0.}]}], LineBox[{{15.573758084491537`, 0.}, 
+             Offset[{-7.347880794884119*^-16, -4.}, {15.573758084491537`, 
+              0.}]}]}, {}}}, 
+        StyleBox[
+         {Thickness[Tiny], 
+          InsetBox["\<\"0000\"\>", Offset[{0, -2}, {1., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0001\"\>", Offset[{0, -2}, {2., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0010\"\>", Offset[{0, -2}, {3., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0011\"\>", Offset[{0, -2}, {4., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0100\"\>", Offset[{0, -2}, {5., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0101\"\>", Offset[{0, -2}, {6., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0110\"\>", Offset[{0, -2}, {7., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"0111\"\>", Offset[{0, -2}, {8., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1000\"\>", Offset[{0, -2}, {9., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1001\"\>", Offset[{0, -2}, {10., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1010\"\>", Offset[{0, -2}, {11., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1011\"\>", Offset[{0, -2}, {12., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1100\"\>", Offset[{0, -2}, {13., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1101\"\>", Offset[{0, -2}, {14., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1110\"\>", Offset[{0, -2}, {15., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+          InsetBox["\<\"1111\"\>", Offset[{0, -2}, {16., 0.}], 
+           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}]}, 
+         "GraphicsLabel",
+         StripOnInput->False]}, "GraphicsTicks",
+       StripOnInput->False]},
+     Antialiasing->False], "GraphicsAxes",
+    StripOnInput->False]},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{False, True},
+  AxesLabel->{None, None},
+  AxesOrigin->{0.2567084078711986, 0.},
+  CoordinatesToolOptions:>{"DisplayFunction" -> ({
+      Identity[
+       Part[#, 1]], 
+      Identity[
+       Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+      Identity[
+       Part[#, 1]], 
+      Identity[
+       Part[#, 2]]}& )},
+  DisplayFunction->Identity,
+  FrameLabel->{{None, None}, {None, None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  PlotRange->{{All, All}, {All, All}},
+  PlotRangePadding->{{
+     Scaled[0.02], 
+     Scaled[0.02]}, {
+     Scaled[0.02], 
+     Scaled[0.05]}},
+  Ticks->{None, Automatic}]], "Output",
+ CellChangeTimes->{3.8944184343479757`*^9},
+ CellLabel->
+  "Out[1372]=",ExpressionUUID->"b85c6660-6368-4f8d-8259-4a06abe29939"]
+}, Open  ]]
+},
+WindowSize->{1706, 915},
+WindowMargins->{{Automatic, 423}, {192, Automatic}},
+Magnification:>1. Inherited,
+FrontEndVersion->"12.1 for Linux x86 (64-bit) (June 19, 2020)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"1e77e3d4-f8c4-4923-ba01-219eff24a252"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 1981, 44, 97, "Text",ExpressionUUID->"a93302b8-6326-4e1b-8cb0-e9787e412dc9"],
+Cell[2542, 66, 101115, 2475, 7785, "Input",ExpressionUUID->"31d148f6-db0e-491f-ba26-cbbb7afdf1f2"],
+Cell[103660, 2543, 287, 6, 30, "Input",ExpressionUUID->"6b486786-2375-4f62-88c9-819b666309e4"],
+Cell[CellGroupData[{
+Cell[103972, 2553, 447, 13, 30, "Input",ExpressionUUID->"6c6a61c1-5e96-4d7f-99dd-594da3149210"],
+Cell[104422, 2568, 220, 4, 34, "Output",ExpressionUUID->"36e9c9c8-a32e-41c1-b00d-f8cffdf731e3"]
+}, Open  ]],
+Cell[104657, 2575, 861, 19, 75, "Input",ExpressionUUID->"6f0c5156-1d6d-4132-a0f4-8211e5328b2f"],
+Cell[CellGroupData[{
+Cell[105543, 2598, 2832, 76, 273, "Input",ExpressionUUID->"ec110d35-a6be-4987-b4f4-0f896e0c27df"],
+Cell[108378, 2676, 22457, 568, 240, "Output",ExpressionUUID->"8dafa102-869f-4a59-9a58-038df6788ad5"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[130872, 3249, 1716, 45, 119, "Input",ExpressionUUID->"1677a190-a2ff-4221-9928-1b046bedeeef"],
+Cell[132591, 3296, 22437, 568, 240, "Output",ExpressionUUID->"b85c6660-6368-4f8d-8259-4a06abe29939"]
+}, Open  ]]
+}
+]
+*)
+
